@@ -88,7 +88,7 @@ def get_keywords_by_multipartite(textComponent:str, question_num:int=10):
 
     return results
         
- def is_far(words_list,currentword,thresh,normalized_levenshtein):
+def is_far(words_list,currentword,thresh,normalized_levenshtein):
     threshold = thresh
     score_list =[]
     for word in words_list:
