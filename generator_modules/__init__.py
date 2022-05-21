@@ -1,5 +1,5 @@
 # Constructor for questgen
 from __future__ import absolute_import
-from Questgen.encoding import encoding
-from Questgen.mcq import mcq
-from Questgen.main import QGen, BoolQGen, AnswerPredictor
+from generator_modules.encoding import encoding
+from generator_modules.mcq import mcq
+from generator_modules.main import QGen, BoolQGen, AnswerPredictor
