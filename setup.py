@@ -25,5 +25,5 @@ setup(name='AlQGen',
            'flashtext==2.7',
            'pandas==1.3.5'
       ],
-      package_data={'generator_modules': ['generator_modules.py', 'mcq.py', '', 'encoding.py']}
+      package_data={'generator_modules': ['generator_modules.py', 'mcq.py', 'mcq_generator.py', 'encoding.py']}
       )
