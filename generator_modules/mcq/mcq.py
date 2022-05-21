@@ -12,6 +12,7 @@ from sense2vec import Sense2Vec
 import requests
 from collections import OrderedDict
 import string
+
 import pke
 import nltk
 from nltk import FreqDist
@@ -86,6 +87,7 @@ def get_options(answer,s2v):
 
     return distractors,"None"
 
+#****************
 def tokenize_sentences(text):
     sentences = [sent_tokenize(text)]
     sentences = [y for x in sentences for y in x]
