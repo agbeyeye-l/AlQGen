@@ -31,7 +31,7 @@ import string
 
 MIN_SENTENCE_LENGTH = 20
 
-def tokenize_sentences(cls, textComponent:str)-> List[str]:
+def tokenize_sentences(textComponent:str)-> List[str]:
     # get sentences from text
     sentences = sent_tokenize(textComponent)
     # remove sentences with length less than a minimum threshold
