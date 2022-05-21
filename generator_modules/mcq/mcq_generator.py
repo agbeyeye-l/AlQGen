@@ -1,12 +1,19 @@
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import numpy as np
+import pandas as pd 
 import time
 import torch
 from transformers import T5ForConditionalGeneration,T5Tokenizer
 import random
 import spacy
+import nltk
+import numpy 
+nltk.download('brown')
+nltk.download('stopwords')
+nltk.download('popular')
+from nltk.corpus import stopwords
 from sense2vec import Sense2Vec
 from nltk import FreqDist
+from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
 
