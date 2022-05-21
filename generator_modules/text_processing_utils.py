@@ -221,7 +221,7 @@ def get_keywords(nlp,text,max_keywords,s2v,fdist,normalized_levenshtein,no_of_se
     doc = nlp(text)
     max_keywords = int(max_keywords)
 
-    keywords = get_keywords_by_multipartite(text=text)
+    keywords = get_keywords_by_multipartite(textComponent=text)
     keywords = sorted(keywords, key=lambda x: fdist[x])
     keywords = filter_phrases(keywords, max_keywords,normalized_levenshtein )
 
