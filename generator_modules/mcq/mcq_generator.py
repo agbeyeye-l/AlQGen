@@ -40,7 +40,7 @@ class MCQGenerator:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
     
-    def generate_questions_mcq(keyword_sentence_mapping):
+    def generate_questions_mcq(self, keyword_sentence_mapping):
         batch_text = []
         answers = keyword_sent_mapping.keys()
         for answer in answers:
