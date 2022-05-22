@@ -103,10 +103,10 @@ class MCQGenerator:
 
 
         keywords = get_keywords(self.nlp,modified_text,inp['max_questions'],self.s2v,self.fdist,self.normalized_levenshtein,len(sentences) )
-
+        print("keywods", keywords)
 
         keyword_sentence_mapping = get_sentences_for_keyword(keywords, sentences)
-
+        print("keywods sentence mapping", keyword_sentence_mapping)
         for k in keyword_sentence_mapping.keys():
             text_snippet = " ".join(keyword_sentence_mapping[k][:3])
             keyword_sentence_mapping[k] = text_snippet
@@ -115,12 +115,14 @@ class MCQGenerator:
         final_output = {}
 
         if len(keyword_sentence_mapping.keys()) == 0:
+            print("returning empty output")
             return final_output
         else:
             try:
                 generated_questions = self.generate_questions_mcq(keyword_sentence_mapping)
 
-            except:
+            except Exception as ex:
+                print("an exceptipn occored",ex)
                 return final_output
             end = time.time()
 
