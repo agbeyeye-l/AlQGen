@@ -53,7 +53,7 @@ class MCQGenerator:
 
 
         print ("Running model for generation")
-        input_ids, attention_masks = encoding["input_ids"].to(device), encoding["attention_mask"].to(self.device)
+        input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
         with torch.no_grad():
             outs = self.model.generate(input_ids=input_ids,
