@@ -40,7 +40,7 @@ class OpenQGenerator:
         extension = ["Explain your answer.", "Why?", "Argue.", "Elaborate on your answer.", "Give a brief explanation."]
         return extension[random.randint(0,len(extension)-1)]
 
-    def generate_question(self,payload):
+    def generate_questions(self,payload):
         start = time.time()
         inp = {
             "input_text": payload.get("input_text"),

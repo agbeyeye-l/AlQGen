@@ -89,7 +89,7 @@ class MCQGenerator:
 
         
                 
-    def predict_mcq(self, payload):
+    def generate_questions(self, payload):
         start = time.time()
         inp = {
             "input_text": payload.get("input_text"),
