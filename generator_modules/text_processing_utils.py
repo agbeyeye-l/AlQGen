@@ -61,13 +61,15 @@ def generate_false_statement(sentence, key):
     false_statement = sentence.replace(key, antonym, 1)
     return false_statement
 
-def get_adjective_keywords(nlp,key_sentences):
+def get_adjective_keywords(nlp,text,target_num=5):
     """get adjectives in key sentences"""
     
-    doc = nlp(key_sentences)
+    doc = nlp(text)
     adjective_keywords = set()
-    for token in doc:
-        if token.pos_=='ADJ' and token.text not in res and len(token.text)>2:
+    for count, token in enumerate(doc):
+        if count>= 1.5 * target_num:
+            break
+        if token.pos_=='ADJ' and token.text not in adjective_keywords and len(token.text)>2:
             adjective_keywords.add(token.text)
     return list(adjective_keywords)
 
@@ -110,10 +112,10 @@ def get_sentences_for_keyword_(keywords, sentences):
           keyword_sentences[key].append(sentence)
           #keyword_processor.remove_keyword(key)
           sentences[index]=''
-    for key in keyword_sentences.keys():
-        values = keyword_sentences[key]
-        values = sorted(values, key=len, reverse=True)
-        keyword_sentences[key] = values
+    # for key in keyword_sentences.keys():
+    #     values = keyword_sentences[key]
+    #     values = sorted(values, key=len, reverse=True)
+    #     keyword_sentences[key] = values
 
     delete_keys = []
     for k in keyword_sentences.keys():
