@@ -84,8 +84,8 @@ def get_key_sentences_tuple(keyword_sentence_pair):
                 if len(sent)<150:
                     sentence = sent
                     break
-                if sentence:
-                    result.append((key,sentence))
+            if sentence:
+                result.append((key,sentence))
     return result
 
     
