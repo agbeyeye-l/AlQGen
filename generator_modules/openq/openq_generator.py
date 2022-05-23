@@ -7,9 +7,9 @@ import random
 import spacy
 import nltk
 import numpy 
-nltk.download('brown')
-nltk.download('stopwords')
-nltk.download('popular')
+# nltk.download('brown')
+# nltk.download('stopwords')
+# nltk.download('popular')
 from nltk.corpus import stopwords
 from sense2vec import Sense2Vec
 from nltk import FreqDist
