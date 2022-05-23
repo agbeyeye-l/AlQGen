@@ -49,7 +49,7 @@ class BoolQGenerator:
         sentences = tokenize_sentences(text)  
         print("first sentence after tokenization", sentences[0])  
         adjective_keywords = get_adjective_keywords(self.nlp, text,num_question)
-        print("extracted adjectives")
+        print("extracted adjectives",adjective_keywords)
         keyword_sentence_pair = get_sentences_for_keyword_(adjective_keywords,sentences)
         keyword_sentence_tuple = get_key_sentences_tuple(keyword_sentence_pair)
         

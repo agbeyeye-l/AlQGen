@@ -66,9 +66,9 @@ def get_adjective_keywords(nlp,text,target_num=5):
     
     doc = nlp(text)
     adjective_keywords = set()
-    for count, token in enumerate(doc):
-        if count>= 1.5 * target_num:
-            break
+    for token in doc:
+        # if count>= 1.5 * target_num:
+        #     break
         if token.pos_=='ADJ' and token.text not in adjective_keywords and len(token.text)>2:
             adjective_keywords.add(token.text)
     return list(adjective_keywords)
