@@ -33,6 +33,13 @@ class BoolQGenerator:
         self.fdist = FreqDist(brown.words())
         self.normalized_levenshtein = NormalizedLevenshtein()
         self.set_seed(42)
+        
+    def set_seed(self,seed):
+        numpy.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+        
     
     
     def generate_questions(self,payload):
