@@ -45,9 +45,11 @@ class BoolQGenerator:
     def generate_questions(self,payload):
         text = payload.get("input_text")
         num_question = payload.get("max_questions", 4)
-        
-        sentences = tokenize_sentences(text)    
-        adjective_keywords = get_adjective_keywords(self.nlp, sentences)
+        print("text was extracted")
+        sentences = tokenize_sentences(text)  
+        print("first sentence after tokenization", sentences[0])  
+        adjective_keywords = get_adjective_keywords(self.nlp, text)
+        print("extracted adjectives")
         keyword_sentence_pair = get_sentences_for_keyword_(adjective_keywords,sentences)
         keyword_sentence_tuple = get_key_sentences_tuple(keyword_sentence_pair)
         

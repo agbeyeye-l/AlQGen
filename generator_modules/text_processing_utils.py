@@ -68,7 +68,7 @@ def get_adjective_keywords(nlp,key_sentences):
     adjective_keywords = set()
     for token in doc:
         if token.pos_=='ADJ' and token.text not in res and len(token.text)>2:
-            adjective_keywords.append(token.text)
+            adjective_keywords.add(token.text)
     return list(adjective_keywords)
 
 def get_key_sentences_tuple(keyword_sentence_pair):
