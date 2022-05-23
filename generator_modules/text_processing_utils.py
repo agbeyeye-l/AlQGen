@@ -13,7 +13,6 @@ from sense2vec import Sense2Vec
 import requests
 from collections import OrderedDict
 import string
-
 import pke
 import nltk
 from nltk import FreqDist
@@ -27,16 +26,104 @@ from nltk.tokenize import sent_tokenize
 from flashtext import KeywordProcessor
 from typing import List
 import string
+nltk.download('wordnet')
+from nltk.corpus import wordnet as wn
 
 
 MIN_SENTENCE_LENGTH = 20
 
+def get_antonym(word):
+    """get the opposite in meaning (antonym) of a word"""
+    
+    word = word.lower()
+    # get sense of word
+    word_sense = wn.synsets(word)
+    # if word has sense
+    if word_sense and word_sense[0].lemmas():
+        lemma = word_sense[0].lemmas()[0]
+        # check if word has an antonym
+        if lemma.antonyms():
+        return lemma.antonyms()[0].name()
+    return None
+
+
+def generate_false_statement(sentence, key):
+    """generate false statement given a sentence: the approach for 
+    generating a false statement here is based on replacing a qualitative
+    word with its opposite in meaning. There are other methods that can be explored 
+    in the future"""
+    
+    # check for existence of antonyms
+    antonym = get_antonym(key)
+    if not antonym:
+        return
+    #subtitute the first occurence of key word with its antonym
+    false_statement = sentence.replace(key, antonym, 1)
+    return false_statement
+
+def get_adjective_keywords(nlp,key_sentences):
+    """get adjectives in key sentences"""
+    
+    doc = nlp(key_sentences)
+    adjective_keywords = set()
+    for token in doc:
+        if token.pos_=='ADJ' and token.text not in res and len(token.text)>2:
+            adjective_keywords.append(token.text)
+    return list(adjective_keywords)
+
+def get_key_sentences_tuple(keyword_sentence_pair):
+    result = []
+    for key in keyword_sentence_pair.keys():
+        sentence= ''
+        if keyword_sentence_pair[key]:
+            ls_sentences = keyword_sentence_pair[key]
+            random.shuffle(ls_sentences)
+            for sent in ls_sentences:
+                if len(sent)<150:
+                    sentence = sent
+                    break
+                if sentence:
+                    result.append((key,sentence))
+    return result
+
+    
 def tokenize_sentences(textComponent:str)-> List[str]:
     # get sentences from text
     sentences = sent_tokenize(textComponent)
     # remove sentences with length less than a minimum threshold
     sentences = [ sentence.strip() for sentence in sentences if len(sentence) > MIN_SENTENCE_LENGTH]
     return sentences
+
+
+def get_sentences_for_keyword_(keywords, sentences):
+    keyword_processor = KeywordProcessor()
+    keyword_sentences = {}
+    for word in keywords:
+        word = word.strip()
+        keyword_sentences[word] = []
+        keyword_processor.add_keyword(word)
+    for index,sentence in enumerate(sentences):
+      if len(sentence)>0:
+        keywords_found = keyword_processor.extract_keywords(sentence)
+        if keywords_found:
+          key = keywords_found[0]
+          keyword_sentences[key].append(sentence)
+          #keyword_processor.remove_keyword(key)
+          sentences[index]=''
+    for key in keyword_sentences.keys():
+        values = keyword_sentences[key]
+        values = sorted(values, key=len, reverse=True)
+        keyword_sentences[key] = values
+
+    delete_keys = []
+    for k in keyword_sentences.keys():
+        if len(keyword_sentences[k]) == 0:
+            delete_keys.append(k)
+    for del_key in delete_keys:
+        del keyword_sentences[del_key]
+
+    return keyword_sentences
+
 
 def  get_keywords_by_yake(textComponent:str,question_num:int=10):
     """extract relevant key words from text using YAKE key extraction algorithm"""
@@ -87,6 +174,7 @@ def get_keywords_by_multipartite(textComponent:str, question_num:int=10):
         results.append(keyword[0])
 
     return results
+
         
 def is_far(words_list,currentword,thresh,normalized_levenshtein):
     threshold = thresh

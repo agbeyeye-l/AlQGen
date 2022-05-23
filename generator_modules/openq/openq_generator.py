@@ -37,7 +37,7 @@ class OpenQGenerator:
         return bool(a)
     
     def open_q_extension(self):
-        extension = ["Explain your answer.", "Why?", "Argue."]
+        extension = ["Explain your answer.", "Why?", "Argue.", "Elaborate on your answer.", "Give a brief explanation."]
         return extension[random.randint(0,len(extension)-1)]
 
     def generate_question(self,payload):
