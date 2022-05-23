@@ -43,7 +43,7 @@ def get_antonym(word):
         lemma = word_sense[0].lemmas()[0]
         # check if word has an antonym
         if lemma.antonyms():
-        return lemma.antonyms()[0].name()
+            return lemma.antonyms()[0].name()
     return None
 
 
