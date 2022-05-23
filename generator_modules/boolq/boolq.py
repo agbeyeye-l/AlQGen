@@ -18,7 +18,8 @@ from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import (tokenize_sentences, get_keywords, 
                                                      get_sentences_for_keyword,get_options,
                                                      filter_phrases,get_sentences_for_keyword_,
-                                                     get_adjective_keywords,get_key_sentences_tuple)
+                                                     get_adjective_keywords,get_key_sentences_tuple,
+                                                     generate_false_statement)
 from flashtext import KeywordProcessor
 
 
