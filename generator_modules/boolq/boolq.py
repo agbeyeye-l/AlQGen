@@ -61,7 +61,7 @@ class BoolQGenerator:
             if not state:
                 statement = generate_false_statement(statement,key)
             if statement:
-                bool_questions.append({"question": statement, "options":["True","False"],"answer":str(s),"key":key})
+                bool_questions.append({"question": statement, "options":["True","False"],"answer":str(state),"key":key})
 
         return bool_questions
             
