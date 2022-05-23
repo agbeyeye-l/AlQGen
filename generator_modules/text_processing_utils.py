@@ -96,7 +96,6 @@ def tokenize_sentences(textComponent:str)-> List[str]:
     sentences = [ sentence.strip() for sentence in sentences if len(sentence) > MIN_SENTENCE_LENGTH]
     return sentences
 
-
 def get_sentences_for_keyword_(keywords, sentences):
     keyword_processor = KeywordProcessor()
     keyword_sentences = {}
@@ -105,17 +104,17 @@ def get_sentences_for_keyword_(keywords, sentences):
         keyword_sentences[word] = []
         keyword_processor.add_keyword(word)
     for index,sentence in enumerate(sentences):
-      if len(sentence)>0:
+      if len(sentence)>0:  
         keywords_found = keyword_processor.extract_keywords(sentence)
         if keywords_found:
-          key = keywords_found[0]
-          keyword_sentences[key].append(sentence)
-          #keyword_processor.remove_keyword(key)
-          sentences[index]=''
-    # for key in keyword_sentences.keys():
-    #     values = keyword_sentences[key]
-    #     values = sorted(values, key=len, reverse=True)
-    #     keyword_sentences[key] = values
+            key = keywords_found[0]
+            keyword_sentences[key].append(sentence)
+            #keyword_processor.remove_keyword(key)
+            sentences[index]=''
+    for key in keyword_sentences.keys():
+        values = keyword_sentences[key]
+        values = sorted(values, key=len, reverse=True)
+        keyword_sentences[key] = values
 
     delete_keys = []
     for k in keyword_sentences.keys():
@@ -125,6 +124,35 @@ def get_sentences_for_keyword_(keywords, sentences):
         del keyword_sentences[del_key]
 
     return keyword_sentences
+
+# def get_sentences_for_keyword_(keywords, sentences):
+#     keyword_processor = KeywordProcessor()
+#     keyword_sentences = {}
+#     for word in keywords:
+#         word = word.strip()
+#         keyword_sentences[word] = []
+#         keyword_processor.add_keyword(word)
+#     for index,sentence in enumerate(sentences):
+#       if len(sentence)>0:
+#         keywords_found = keyword_processor.extract_keywords(sentence)
+#         if keywords_found:
+#           key = keywords_found[0]
+#           keyword_sentences[key].append(sentence)
+#           #keyword_processor.remove_keyword(key)
+#           #sentences[index]=''
+#     # for key in keyword_sentences.keys():
+#     #     values = keyword_sentences[key]
+#     #     values = sorted(values, key=len, reverse=True)
+#     #     keyword_sentences[key] = values
+
+#     delete_keys = []
+#     for k in keyword_sentences.keys():
+#         if len(keyword_sentences[k]) == 0:
+#             delete_keys.append(k)
+#     for del_key in delete_keys:
+#         del keyword_sentences[del_key]
+
+#     return keyword_sentences
 
 
 def  get_keywords_by_yake(textComponent:str,question_num:int=10):

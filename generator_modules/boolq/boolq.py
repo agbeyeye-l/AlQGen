@@ -45,14 +45,13 @@ class BoolQGenerator:
     def generate_questions(self,payload):
         text = payload.get("input_text")
         num_question = payload.get("max_questions", 4)
-        print("text was extracted")
         sentences = tokenize_sentences(text)  
-        print("first sentence after tokenization", sentences[0])  
         adjective_keywords = get_adjective_keywords(self.nlp, text,num_question)
         print("extracted adjectives",adjective_keywords)
         keyword_sentence_pair = get_sentences_for_keyword_(adjective_keywords,sentences)
+        print("keyword sentence pair",keyword_sentence_pair)
         keyword_sentence_tuple = get_key_sentences_tuple(keyword_sentence_pair)
-        
+        print("keyword sentence tuple",keyword_sentence_tuple)
         bool_res = [bool(random.choice([0,1])) for _ in range(num_question)]
         bool_questions = []
         for index, state in enumerate(bool_res):
