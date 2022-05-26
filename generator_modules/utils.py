@@ -4,7 +4,7 @@ class QuestionType:
     BOOLQ="True/False"
     
     
-class Messages:
+class ErrorMessages:
     @staticmethod
-    def NoInputTextError():
+    def noInputTextError():
         return "No input text provided"

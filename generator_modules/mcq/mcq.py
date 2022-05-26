@@ -16,7 +16,7 @@ from nltk import FreqDist
 from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
-from generator_modules.utils import QuestionType, Messages
+from generator_modules.utils import QuestionType, ErrorMessages
 from generator_modules.models import QuestionRequest, Question
 from typing import List
 
@@ -93,7 +93,7 @@ class MCQGenerator:
         
         # if no input text provided
         if len(text)<1:
-            return Messages.NoInputTextError()
+            return ErrorMessages.noInputTextError()
         
         questions: List[Question]=[]
         # tokenize text
