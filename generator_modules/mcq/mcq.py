@@ -88,8 +88,8 @@ class MCQGenerator:
         
                 
     def generate_questions(self, corpus:QuestionRequest):
-        text = corpus.text
-        num_of_questions = corpus.num_question
+        text = corpus.get('text')
+        num_of_questions = corpus.get('num_question')
         
         # if no input text provided
         if len(text)<1:
