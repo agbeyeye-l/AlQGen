@@ -80,7 +80,7 @@ class MCQGenerator:
                                 attention_mask=attention_masks,
                                 max_length=150)
         # form questions
-        results = self.build_question_objects(outs)
+        results = self.build_question_objects(outs,answers)
         return results
 
         
