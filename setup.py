@@ -7,7 +7,7 @@ setup(name='AlQGen',
       author_email='',
       packages=['generator_modules', 'generator_modules.mcq', 'generator_modules.openq', 'generator_modules.boolq'],
       install_requires=[
-           'pydantic==1.8.1',
+           
            'torch==1.10.0',
            'transformers==3.0.2',
            'sense2vec==2.0.0',
@@ -23,7 +23,8 @@ setup(name='AlQGen',
            'pytz==2018.9',
            'python-dateutil==2.8.2',
            'flashtext==2.7',
-           'pandas==1.3.5'
+           'pandas==1.3.5',
+           'pydantic==1.8.1'
       ],
       package_data={'generator_modules': ['generator_modules.py', 'mcq.py', 'openq.py','boolq.py']}
       )
