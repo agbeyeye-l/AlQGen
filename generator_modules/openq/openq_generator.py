@@ -15,8 +15,7 @@ from sense2vec import Sense2Vec
 from nltk import FreqDist
 from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
-from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
-from generator_modules.encoding.encoding import beam_search_decoding
+from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options
 
 class OpenQGenerator:
        
@@ -40,6 +39,19 @@ class OpenQGenerator:
         extension = ["Explain your answer.", "Why?", "Argue.", "Elaborate on your answer.", "Give a brief explanation."]
         return extension[random.randint(0,len(extension)-1)]
 
+    def beam_search_decoding (self,inp_ids,attn_mask,model,tokenizer):
+        beam_output = model.generate(input_ids=inp_ids,
+                                        attention_mask=attn_mask,
+                                        max_length=256,
+                                    num_beams=10,
+                                    num_return_sequences=3,
+                                    no_repeat_ngram_size=2,
+                                    early_stopping=True
+                                    )
+        Questions = [tokenizer.decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True) for out in
+                    beam_output]
+        return [Question.strip().capitalize() for Question in Questions]
+
     def generate_questions(self,payload):
         start = time.time()
         inp = {
@@ -58,7 +70,7 @@ class OpenQGenerator:
         encoding = self.tokenizer.encode_plus(form, return_tensors="pt")
         input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
-        output = beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
+        output = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
         
         for i in range(len(output)):
             output[i] = f"{output[i]} {self.open_q_extension()}"
