@@ -16,7 +16,7 @@ from nltk import FreqDist
 from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
-import utils
+from generator_modules.utils import QuestionType
 
 class MCQGenerator:
     def __init__(self):
@@ -52,7 +52,7 @@ class MCQGenerator:
             decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
             # get question statement
             question_object["question"] = decoded_data.replace("question:", "").strip()
-            question_object["question_type"] = utils.QuestionType.MCQ
+            question_object["question_type"] = QuestionType.MCQ
             question_object["answer"] = val
             # filter options and return the best distractors
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
