@@ -111,7 +111,7 @@ class MCQGenerator:
                 questions = self.generate(keyword_sentence_mapping)
             except Exception as ex:
                 # when execption occurs, return 
-                print("exception occured so we're returning empty")
+                print("exception occured so we're returning empty",ex)
                 return questions
 
             # empty the cudo cache
