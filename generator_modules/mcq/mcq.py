@@ -103,12 +103,15 @@ class MCQGenerator:
 
         # if no key sentence map is found return empty list
         if len(keyword_sentence_mapping.keys()) == 0:
+            print("here there is no keyword mapp")
             return questions
         else:
             try:
+                print("generating mcq")
                 questions = self.generate(keyword_sentence_mapping)
             except Exception as ex:
                 # when execption occurs, return 
+                print("exception occured so we're returning empty")
                 return questions
 
             # empty the cudo cache
