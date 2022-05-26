@@ -23,7 +23,8 @@ setup(name='AlQGen',
            'pytz==2018.9',
            'python-dateutil==2.8.2',
            'flashtext==2.7',
-           'pandas==1.3.5'
+           'pandas==1.3.5',
+           'pydantic'
       ],
       package_data={'generator_modules': ['generator_modules.py', 'mcq.py', 'openq.py','boolq.py']}
       )
