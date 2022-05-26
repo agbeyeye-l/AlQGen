@@ -16,7 +16,11 @@ from nltk import FreqDist
 from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
-from generator_modules.utils import QuestionType
+from generator_modules.utils import QuestionType, Messages
+from generator_modules.models import QuestionRequest, Question
+from typing import List
+
+
 
 class MCQGenerator:
     def __init__(self):
@@ -40,25 +44,23 @@ class MCQGenerator:
             torch.cuda.manual_seed_all(seed)
     
     def build_question_objects(self,model_output,answers):
-        # Build questions
-        question_list =[]
+        """form questions"""
+        
+        question_list: List[Question] =[]
         for index, val in enumerate(answers):
             # get mcq options/distractors
             options = get_options(val, self.s2v)
             if len(options)<1:
                 continue
-            question_object ={}
             output = model_output[index, :]
             decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
             # get question statement
-            question_object["question"] = decoded_data.replace("question:", "").strip()
-            question_object["question_type"] = QuestionType.MCQ
-            question_object["answer"] = val
+            question_text = decoded_data.replace("question:", "").strip()
             # filter options and return the best distractors
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
-            question_object["options"] = options if len(options)<7 else options[:6]
-
-            question_list.append(question_object)
+            options = options if len(options)<7 else options[:6]
+            question = Question(question=question_text, answer= val, options= options, question_type=QuestionType.MCQ)
+            question_list.append(question)
 
         return question_list
         
@@ -85,11 +87,16 @@ class MCQGenerator:
 
         
                 
-    def generate_questions(self, corpus):
-        questions = {}
-        text = corpus.get("input_text","")
-        num_of_questions = corpus.get("max_questions", 5)
+    def generate_questions(self, corpus:QuestionRequest):
+        text = corpus.text
+        num_of_questions = corpus.num_question
         
+        # if no input text provided
+        if len(text)<1:
+            return Messages.NoInputTextError()
+        
+        questions: List[Question]=[]
+        # tokenize text
         sentences = tokenize_sentences(text)
         text = " ".join(sentences)
         
@@ -103,15 +110,14 @@ class MCQGenerator:
 
         # if no key sentence map is found return empty list
         if len(keyword_sentence_mapping.keys()) == 0:
-            print("here there is no keyword mapp")
             return questions
         else:
             try:
-                print("generating mcq")
+                print("generating mcq questions")
                 questions = self.generate(keyword_sentence_mapping)
             except Exception as ex:
                 # when execption occurs, return 
-                print("exception occured so we're returning empty",ex)
+                print("exception occured so we're returning empty list of questions",ex)
                 return questions
 
             # empty the cudo cache

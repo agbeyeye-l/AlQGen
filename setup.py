@@ -7,7 +7,7 @@ setup(name='AlQGen',
       author_email='',
       packages=['generator_modules', 'generator_modules.mcq', 'generator_modules.openq', 'generator_modules.boolq'],
       install_requires=[
-         
+           'pydantic==1.8.1',
            'torch==1.10.0',
            'transformers==3.0.2',
            'sense2vec==2.0.0',
