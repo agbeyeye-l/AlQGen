@@ -48,7 +48,7 @@ class OpenQGenerator:
 
     def generate_questions(self,corpus:QuestionRequest):
         text = corpus.get('text')
-        num_questions = corpus.num_question
+        num_questions = corpus.get('num_question')
 
         # if no input text provided
         if len(text)<1:
