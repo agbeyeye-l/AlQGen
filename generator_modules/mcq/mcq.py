@@ -60,7 +60,7 @@ class MCQGenerator:
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
             options = options if len(options)<7 else options[:6]
             question = Question(question=question_text, answer= val, options= options, question_type=QuestionType.MCQ)
-            question_list.append(question)
+            question_list.append(question.dict())
 
         return question_list
         

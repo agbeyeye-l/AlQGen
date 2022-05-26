@@ -4,18 +4,12 @@ import time
 import torch
 from transformers import T5ForConditionalGeneration,T5Tokenizer
 import random
-import spacy
-import nltk
 import numpy 
-# nltk.download('brown')
-# nltk.download('stopwords')
-# nltk.download('popular')
-from nltk.corpus import stopwords
-from sense2vec import Sense2Vec
-from nltk import FreqDist
-from nltk.corpus import brown
-from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options
+from generator_modules.utils import QuestionType, ErrorMessages
+from generator_modules.models import QuestionRequest, Question
+from typing import List
+
 
 class OpenQGenerator:
        
@@ -52,35 +46,30 @@ class OpenQGenerator:
                     beam_output]
         return [Question.strip().capitalize() for Question in Questions]
 
-    def generate_questions(self,payload):
-        start = time.time()
-        inp = {
-            "input_text": payload.get("input_text"),
-            "max_questions": payload.get("max_questions", 4)
-        }
+    def generate_questions(self,corpus:QuestionRequest):
+        text = corpus.get('text')
+        num_questions = corpus.num_question
 
-        text = inp['input_text']
-        num= inp['max_questions']
+        # if no input text provided
+        if len(text)<1:
+            return ErrorMessages.noInputTextError()
+        
+        question_list: List[Question]=[]
         sentences = tokenize_sentences(text)
-        joiner = " "
-        modified_text = joiner.join(sentences)
+        text = " ".join(sentences)
         answer = self.random_choice()
-        form = "truefalse: %s passage: %s </s>" % (modified_text, answer)
+        model_input = f"truefalse: {text} passage: {answer} </s>"
 
-        encoding = self.tokenizer.encode_plus(form, return_tensors="pt")
+        encoding = self.tokenizer.encode_plus(model_input, return_tensors="pt")
         input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
-        output = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
+        outputs = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
         
-        for i in range(len(output)):
-            output[i] = f"{output[i]} {self.open_q_extension()}"
+        for out in outputs:
+            question = Question(question=f"{out} {self.open_q_extension()}", options=[], answer='', question_type=QuestionType.OPENQ)
+            question_list.append(question.dict())
             
         if torch.device=='cuda':
             torch.cuda.empty_cache()
-        
-        final= {}
-        final['Text']= text
-        final['Count']= num
-        final['Boolean Questions']= output
             
-        return final
+        return question_list
