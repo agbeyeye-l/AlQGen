@@ -282,12 +282,12 @@ def get_options(answer,s2v):
         distractors = sense2vec_get_words(answer,s2v)
         if len(distractors) > 0:
             print(" Sense2vec_distractors successful for word : ", answer)
-            return distractors,"sense2vec"
+            return distractors
     except:
         print (" Sense2vec_distractors failed for word : ",answer)
 
 
-    return distractors,"None"
+    return distractors
 
 
 def get_sentences_for_keyword(keywords, sentences):

@@ -7,15 +7,16 @@ import random
 import spacy
 import nltk
 import numpy 
-# nltk.download('brown')
-# nltk.download('stopwords')
-# nltk.download('popular')
+nltk.download('brown')
+nltk.download('stopwords')
+nltk.download('popular')
 from nltk.corpus import stopwords
 from sense2vec import Sense2Vec
 from nltk import FreqDist
 from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
+from utils import QuestionType
 
 class MCQGenerator:
     def __init__(self):
@@ -27,9 +28,7 @@ class MCQGenerator:
         self.device = device
         self.model = model
         self.nlp = spacy.load('en_core_web_sm')
-
         self.s2v = Sense2Vec().from_disk('s2v_old')
-
         self.fdist = FreqDist(brown.words())
         self.normalized_levenshtein = NormalizedLevenshtein()
         self.set_seed(42)
@@ -40,98 +39,81 @@ class MCQGenerator:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
     
-    def generate_questions_mcq(self, keyword_sent_mapping):
+    def build_question_objects(self,model_output,answers):
+        # Build questions
+        question_list =[]
+        for index, val in enumerate(answers):
+            # get mcq options/distractors
+            options = get_options(val, self.s2v)
+            if len(options)<1:
+                continue
+            question_object ={}
+            output = model_output[index, :]
+            decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
+            # get question statement
+            question_object["question"] = decoded_data.replace("question:", "").strip()
+            question_object["question_type"] = QuestionType.MCQ
+            question_object["answer"] = val
+            # filter options and return the best distractors
+            options = filter_phrases(options, 10,self.normalized_levenshtein) 
+            question_object["options"] = options if len(options)<7 else options[:6]
+
+            question_list.append(question_object)
+
+        return question_list
+        
+        
+    def generate(self, keyword_sent_mapping):
         batch_text = []
         answers = keyword_sent_mapping.keys()
         for answer in answers:
-            txt = keyword_sent_mapping[answer]
-            context = "context: " + txt
-            text = context + " " + "answer: " + answer + " </s>"
+            context = keyword_sent_mapping[answer]
+            text = f"context: {context} answer: {answer} </s>"
             batch_text.append(text)
 
         encoding = self.tokenizer.batch_encode_plus(batch_text, pad_to_max_length=True, return_tensors="pt")
 
-
-        print ("Running model for generation")
         input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
         with torch.no_grad():
             outs = self.model.generate(input_ids=input_ids,
                                 attention_mask=attention_masks,
                                 max_length=150)
-
-        output_array ={}
-        output_array["questions"] =[]
-    #     print(outs)
-        for index, val in enumerate(answers):
-            individual_question ={}
-            out = outs[index, :]
-            dec = self.tokenizer.decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True)
-
-            Question = dec.replace("question:", "")
-            Question = Question.strip()
-            individual_question["question_statement"] = Question
-            individual_question["question_type"] = "MCQ"
-            individual_question["answer"] = val
-            individual_question["id"] = index+1
-            individual_question["options"], individual_question["options_algorithm"] = get_options(val, self.s2v)
-
-            individual_question["options"] =  filter_phrases(individual_question["options"], 10,self.normalized_levenshtein)
-            index = 3
-            individual_question["extra_options"]= individual_question["options"][index:]
-            individual_question["options"] = individual_question["options"][:index]
-            individual_question["context"] = keyword_sent_mapping[val]
-        
-            if len(individual_question["options"])>0:
-                output_array["questions"].append(individual_question)
-
-        return output_array
+        # form questions
+        results = self.build_question_objects(outs)
+        return results
 
         
                 
-    def generate_questions(self, payload):
-        start = time.time()
-        inp = {
-            "input_text": payload.get("input_text"),
-            "max_questions": payload.get("max_questions", 4)
-        }
-
-        text = inp['input_text']
+    def generate_questions(self, corpus):
+        questions = {}
+        text = corpus.get("input_text","")
+        num_of_questions = corpus.get("max_questions", 5)
+        
         sentences = tokenize_sentences(text)
-        joiner = " "
-        modified_text = joiner.join(sentences)
-
-
-        keywords = get_keywords(self.nlp,modified_text,inp['max_questions'],self.s2v,self.fdist,self.normalized_levenshtein,len(sentences) )
-        print("keywods", keywords)
-
+        text = " ".join(sentences)
+        
+        # extract keywords
+        keywords = get_keywords(self.nlp,text,num_of_questions,self.s2v,self.fdist,self.normalized_levenshtein,len(sentences) )
+        # map keywords to sentences
         keyword_sentence_mapping = get_sentences_for_keyword(keywords, sentences)
-        print("keywods sentence mapping", keyword_sentence_mapping)
         for k in keyword_sentence_mapping.keys():
             text_snippet = " ".join(keyword_sentence_mapping[k][:3])
             keyword_sentence_mapping[k] = text_snippet
 
-   
-        final_output = {}
-
+        # if no key sentence map is found return empty list
         if len(keyword_sentence_mapping.keys()) == 0:
-            print("returning empty output")
-            return final_output
+            return questions
         else:
             try:
-                generated_questions = self.generate_questions_mcq(keyword_sentence_mapping)
-
+                questions = self.generate(keyword_sentence_mapping)
             except Exception as ex:
-                print("an exceptipn occored",ex)
-                return final_output
-            end = time.time()
+                # when execption occurs, return 
+                return questions
 
-            final_output["statement"] = modified_text
-            final_output["questions"] = generated_questions["questions"]
-            final_output["time_taken"] = end-start
-            
+            # empty the cudo cache
             if torch.device=='cuda':
                 torch.cuda.empty_cache()
                 
-            return final_output
+            return questions
         
