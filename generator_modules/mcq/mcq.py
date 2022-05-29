@@ -70,7 +70,9 @@ class MCQGenerator:
             #get mcq options/distractors
             print("getting distractors")
             options = get_options(answer_question[0], self.s2v)
-            if len(options)<1:
+            if not options or len(options)<1:
+                question = Question(question=answer_question[1], answer= answer_question[0], options= [answer_question[0]], question_type=QuestionType.MCQ)
+                question_list.append(question.dict())
                 continue
             print("filtering options")
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
