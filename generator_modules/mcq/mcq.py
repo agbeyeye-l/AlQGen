@@ -79,9 +79,12 @@ class MCQGenerator:
                 
     def verify_answer(self,context, question):
         input = f"question: {question} context: {context} </s>"
+        print("encoding to verify answer")
         encoded_data = self.tokenizer.encode_plus(input, return_tensors='pt')
         input_ids, attention_masks = encoded_data["input_ids"].to(self.device), encoded_data["attention_mask"].to(self.device)
-        output = self.answer_verifier_model.generate(input_ids, attention_masks, max_length=256 )
+        print("generating answer by answer verifier model")
+        output = self.answer_verifier_model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
+        print("decoding verified answer")
         answer =  self.tokenizer.decode(output[0], skip_special_tokens=True,clean_up_tokenization_spaces=True)
         answer = answer.strip().capitalize()
         return answer
@@ -98,17 +101,18 @@ class MCQGenerator:
         encoded_data = self.tokenizer.batch_encode_plus(batch_text, pad_to_max_length=True, return_tensors='pt')
 
         input_ids, attention_masks = encoded_data["input_ids"].to(self.device), encoded_data["attention_mask"].to(self.device)
-        
+        print("generating questions")
 
         with torch.no_grad():
             model_output = self.model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
-        
+        print("decoding questions")
         questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
         answer_question_pair=[]
         for index, answer in enumerate(answers):
             context = keyword_sent_mapping[answer]
             question = questions_generated[index].replace("question:", "").strip()
             if question and answer:
+                print("verifying answer")
                 verified_answer = self.verify_answer(question, context)
                 answer_length = len(verified_answer)
                 if answer_length> 0 and answer_length < 100:
