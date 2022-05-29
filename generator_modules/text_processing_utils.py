@@ -249,7 +249,10 @@ def edits(word):
 
 def sense2vec_get_words(word,s2v):
     output = []
-
+    word_split = word.split("and")
+    if len(word_split)>1:
+        word = word_split[0]
+        
     word_preprocessed =  word.translate(word.maketrans("","", string.punctuation))
     word_preprocessed = word_preprocessed.lower()
 
