@@ -81,7 +81,7 @@ class MCQGenerator:
         return question_list
             
                 
-    def verify_answer(self,context, question):
+    def verify_answer(self,question,context):
         input = f"question: {question} context: {context} </s>"
         print("encoding to verify answer")
         encoded_data = self.tokenizer.encode_plus(input, return_tensors='pt')
