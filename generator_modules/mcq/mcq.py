@@ -96,7 +96,7 @@ class MCQGenerator:
         return answer
         
         
-    def generate(self, keyword_sent_mapping):
+    def generate(self, keyword_sent_mapping, textComponent):
         batch_text = []
         answers = keyword_sent_mapping.keys()
         for answer in answers:
@@ -122,7 +122,7 @@ class MCQGenerator:
          
             if question and answer:
                 print("verifying answer")
-                verified_answer = str(self.verify_answer(question, context))
+                verified_answer = str(self.verify_answer(question, textComponent))
                 answer_length = len(verified_answer.split(" "))
                 print("context:",context)
                 print("question:",question)
@@ -165,7 +165,7 @@ class MCQGenerator:
         else:
             try:
                 print("generating mcq questions")
-                questions = self.generate(keyword_sentence_mapping)
+                questions = self.generate(keyword_sentence_mapping,text)
             except Exception as ex:
                 # when execption occurs, return 
                 print("exception occured so we're returning empty list of questions",ex)
