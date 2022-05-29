@@ -117,12 +117,18 @@ class MCQGenerator:
         answer_question_pair=[]
         for index, answer in enumerate(answers):
             context = keyword_sent_mapping[answer]
+            
             question = questions_generated[index].replace("question:", "").strip()
+            print("context:",context)
+            print("question:",question)
+            print("answer:",answer)
+            print("--------------------------------------------------------")
             if question and answer:
                 print("verifying answer")
                 verified_answer = str(self.verify_answer(question, context))
                 answer_length = len(verified_answer.split(" "))
                 if answer_length> 0 and answer_length < 5:
+                    print("question and answer has been added")
                     answer_question_pair.append((verified_answer, question))
         # form questions
         #results = self.build_question_objects(model_output,answers)
