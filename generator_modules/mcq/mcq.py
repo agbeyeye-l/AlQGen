@@ -91,7 +91,8 @@ class MCQGenerator:
         print("decoding verified answer")
         answer =  self.tokenizer.decode(output[0], skip_special_tokens=True,clean_up_tokenization_spaces=True)
         answer = answer.strip().capitalize()
-        print("returning verified answers",answer)
+        print("question:", question)
+        print("verified answer",answer)
         return answer
         
         
@@ -112,6 +113,7 @@ class MCQGenerator:
             model_output = self.model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
         print("decoding questions")
         questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
+        print("generated questions are:", questions_generated)
         answer_question_pair=[]
         for index, answer in enumerate(answers):
             context = keyword_sent_mapping[answer]
