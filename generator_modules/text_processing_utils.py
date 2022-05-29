@@ -249,16 +249,23 @@ def edits(word):
 
 def sense2vec_get_words(word,s2v):
     output = []
+    # if answer is made up of conjunctive word "and"
     word_split = word.split("and")
     if len(word_split)>1:
         word = word_split[0]
-        
+    else:
+        # if answer is a list of items separated by commas
+        word_split = word.split(",")
+        if word_split and len(word_split)>1:
+            word = word_split[0]
+       
     word_preprocessed =  word.translate(word.maketrans("","", string.punctuation))
     word_preprocessed = word_preprocessed.lower()
 
     word_edits = edits(word_preprocessed)
 
     word = word.replace(" ", "_")
+    word = word.replace("-", "_")
 
     sense = s2v.get_best_sense(word)
     most_similar = s2v.most_similar(sense, n=15)
@@ -288,6 +295,7 @@ def get_options(answer,s2v):
             return distractors
     except Exception as ex:
         print (" Sense2vec_distractors failed for word : ",answer,ex)
+        return None
 
 
     return distractors
