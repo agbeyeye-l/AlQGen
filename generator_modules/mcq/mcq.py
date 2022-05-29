@@ -27,7 +27,7 @@ class MCQGenerator:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
         self.model = T5ForConditionalGeneration.from_pretrained('Parth/result').to(self.device)
-        self.answer_verifier_model = T5ForConditionalGeneration.from_pretrained('Parth/Boolean').to(self.device)
+        self.answer_verifier_model = T5ForConditionalGeneration.from_pretrained('Parth/boolean').to(self.device)
         self.nlp = spacy.load('en_core_web_sm')
         self.s2v = Sense2Vec().from_disk('s2v_old')
         self.fdist = FreqDist(brown.words())
