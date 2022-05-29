@@ -24,18 +24,16 @@ from typing import List
 
 class MCQGenerator:
     def __init__(self):
-        
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
-        model = T5ForConditionalGeneration.from_pretrained('Parth/result')
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model.to(device)
-        self.device = device
-        self.model = model
+        self.model = T5ForConditionalGeneration.from_pretrained('Parth/result').to(self.device)
+        self.answer_verifier_model = T5ForConditionalGeneration.from_pretrained('Parth/Boolean').to(self.device)
         self.nlp = spacy.load('en_core_web_sm')
         self.s2v = Sense2Vec().from_disk('s2v_old')
         self.fdist = FreqDist(brown.words())
         self.normalized_levenshtein = NormalizedLevenshtein()
         self.set_seed(42)
+      
         
     def set_seed(self,seed):
         numpy.random.seed(seed)
@@ -43,26 +41,50 @@ class MCQGenerator:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
     
-    def build_question_objects(self,model_output,answers):
-        """form questions"""
+    
+    # def build_question_objects(self,model_output,answers):
+    #     """form questions"""
         
-        question_list: List[Question] =[]
-        for index, val in enumerate(answers):
-            # get mcq options/distractors
-            options = get_options(val, self.s2v)
+    #     question_list: List[Question] =[]
+    #     for index, val in enumerate(answers):
+    #         # get mcq options/distractors
+    #         options = get_options(val, self.s2v)
+    #         if len(options)<1:
+    #             continue
+    #         output = model_output[index, :]
+    #         decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
+    #         # get question statement
+    #         question_text = decoded_data.replace("question:", "").strip()
+    #         # filter options and return the best distractors
+    #         options = filter_phrases(options, 10,self.normalized_levenshtein) 
+    #         options = options if len(options)<7 else options[:6]
+    #         question = Question(question=question_text, answer= val, options= options, question_type=QuestionType.MCQ)
+    #         question_list.append(question.dict())
+
+    #     return question_list
+    
+    def formulate_questions(self,answer_question_pair):
+        question_list=[]
+        for answer_question in answer_question_pair:
+            #get mcq options/distractors
+            options = get_options(answer_question[0], self.s2v)
             if len(options)<1:
                 continue
-            output = model_output[index, :]
-            decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
-            # get question statement
-            question_text = decoded_data.replace("question:", "").strip()
-            # filter options and return the best distractors
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
             options = options if len(options)<7 else options[:6]
-            question = Question(question=question_text, answer= val, options= options, question_type=QuestionType.MCQ)
+            question = Question(question=answer_question[1], answer= answer_question[0], options= options, question_type=QuestionType.MCQ)
             question_list.append(question.dict())
-
         return question_list
+            
+                
+    def verify_answer(self,context, question):
+        input = f"question: {question} context: {context} </s>"
+        encoded_data = self.tokenizer.encode_plus(input, return_tensors='pt')
+        input_ids, attention_masks = encoded_data["input_ids"].to(self.device), encoded_data["attention_mask"].to(self.device)
+        output = self.answer_verifier_model.generate(input_ids, attention_masks, max_length=256 )
+        answer =  self.tokenizer.decode(output[0], skip_special_tokens=True,clean_up_tokenization_spaces=True)
+        answer = answer.strip().capitalize()
+        return answer
         
         
     def generate(self, keyword_sent_mapping):
@@ -73,20 +95,30 @@ class MCQGenerator:
             text = f"context: {context} answer: {answer} </s>"
             batch_text.append(text)
 
-        encoding = self.tokenizer.batch_encode_plus(batch_text, pad_to_max_length=True, return_tensors="pt")
+        encoded_data = self.tokenizer.batch_encode_plus(batch_text, pad_to_max_length=True, return_tensors='pt')
 
-        input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
+        input_ids, attention_masks = encoded_data["input_ids"].to(self.device), encoded_data["attention_mask"].to(self.device)
+        
 
         with torch.no_grad():
-            outs = self.model.generate(input_ids=input_ids,
-                                attention_mask=attention_masks,
-                                max_length=150)
+            model_output = self.model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
+        
+        questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
+        answer_question_pair=[]
+        for index, answer in enumerate(answers):
+            context = keyword_sent_mapping[answer]
+            question = questions_generated[index].replace("question:", "").strip()
+            if question and answer:
+                verified_answer = self.verify_answer(question, context)
+                answer_length = len(verified_answer)
+                if answer_length> 0 and answer_length < 100:
+                    answer_question_pair.append((verified_answer, question))
         # form questions
-        results = self.build_question_objects(outs,answers)
+        #results = self.build_question_objects(model_output,answers)
+        results = self.formulate_questions(answer_question_pair)
         return results
 
-        
-                
+                      
     def generate_questions(self, corpus:QuestionRequest):
         text = corpus.get('text')
         num_of_questions = corpus.get('num_question')

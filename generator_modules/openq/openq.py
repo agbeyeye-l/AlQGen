@@ -42,9 +42,9 @@ class OpenQGenerator:
                                     no_repeat_ngram_size=2,
                                     early_stopping=True
                                     )
-        Questions = [tokenizer.decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True) for out in
+        outputs = [tokenizer.decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True) for out in
                     beam_output]
-        return [Question.strip().capitalize() for Question in Questions]
+        return [output.strip().capitalize() for output in outputs]
 
     def generate_questions(self,corpus:QuestionRequest):
         text = corpus.get('text')
