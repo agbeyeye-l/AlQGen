@@ -91,6 +91,7 @@ class MCQGenerator:
         print("decoding verified answer")
         answer =  self.tokenizer.decode(output[0], skip_special_tokens=True,clean_up_tokenization_spaces=True)
         answer = answer.strip().capitalize()
+        print("returning verified answers")
         return answer
         
         
@@ -117,7 +118,7 @@ class MCQGenerator:
             question = questions_generated[index].replace("question:", "").strip()
             if question and answer:
                 print("verifying answer")
-                verified_answer = self.verify_answer(question, context)
+                verified_answer = str(self.verify_answer(question, context))
                 answer_length = len(verified_answer.split(" "))
                 if answer_length> 0 and len(answer_length) < 5:
                     answer_question_pair.append((verified_answer, question))
