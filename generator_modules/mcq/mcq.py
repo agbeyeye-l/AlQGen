@@ -65,13 +65,17 @@ class MCQGenerator:
     
     def formulate_questions(self,answer_question_pair):
         question_list=[]
+        print("formulating questions")
         for answer_question in answer_question_pair:
             #get mcq options/distractors
+            print("getting distractors")
             options = get_options(answer_question[0], self.s2v)
             if len(options)<1:
                 continue
+            print("filtering options")
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
             options = options if len(options)<7 else options[:6]
+            print("building a question object")
             question = Question(question=answer_question[1], answer= answer_question[0], options= options, question_type=QuestionType.MCQ)
             question_list.append(question.dict())
         return question_list
@@ -83,7 +87,7 @@ class MCQGenerator:
         encoded_data = self.tokenizer.encode_plus(input, return_tensors='pt')
         input_ids, attention_masks = encoded_data["input_ids"].to(self.device), encoded_data["attention_mask"].to(self.device)
         print("generating answer by answer verifier model")
-        output = self.answer_verifier_model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
+        output = self.answer_verifier_model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=256)
         print("decoding verified answer")
         answer =  self.tokenizer.decode(output[0], skip_special_tokens=True,clean_up_tokenization_spaces=True)
         answer = answer.strip().capitalize()
@@ -114,8 +118,8 @@ class MCQGenerator:
             if question and answer:
                 print("verifying answer")
                 verified_answer = self.verify_answer(question, context)
-                answer_length = len(verified_answer)
-                if answer_length> 0 and answer_length < 100:
+                answer_length = len(verified_answer.split(" "))
+                if answer_length> 0 and len(answer_length) < 5:
                     answer_question_pair.append((verified_answer, question))
         # form questions
         #results = self.build_question_objects(model_output,answers)
