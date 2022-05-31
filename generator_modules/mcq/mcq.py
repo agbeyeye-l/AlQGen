@@ -143,6 +143,7 @@ class MCQGenerator:
     def generate_questions(self, corpus:QuestionRequest):
         text = corpus.get('text')
         num_of_questions = corpus.get('num_question')
+        optional_keywords = corpus.get('optional_keywords')
         
         # if no input text provided
         if len(text)<1:
@@ -155,6 +156,9 @@ class MCQGenerator:
         
         # extract keywords
         keywords = get_keywords(self.nlp,text,num_of_questions,self.s2v,self.fdist,self.normalized_levenshtein,len(sentences) )
+        keywords.extend(optional_keywords)
+        keywords = [keyword.lower() for keyword in keywords]
+        keywords = list(set(keywords))
         # map keywords to sentences
         keyword_sentence_mapping = get_sentences_for_keyword(keywords, sentences)
         for k in keyword_sentence_mapping.keys():
