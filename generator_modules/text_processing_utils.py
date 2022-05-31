@@ -260,14 +260,15 @@ def sense2vec_get_words(word,s2v):
     #         word = word_split[0]
     
     try:   
+        print("translating answer", word)
         word_preprocessed =  word.translate(word.maketrans("","", string.punctuation))
         word_preprocessed = word_preprocessed.lower()
-
+        print("getting word edit",word)
         word_edits = edits(word_preprocessed)
 
         word = word.replace(" ", "_")
         #word = word.replace("-", "_")
-
+        print("get best senses", word)
         sense = s2v.get_best_sense(word)
         most_similar = s2v.most_similar(sense, n=15)
         print("most similar senses", most_similar)
