@@ -270,7 +270,7 @@ def sense2vec_get_words(word,s2v):
 
         sense = s2v.get_best_sense(word)
         most_similar = s2v.most_similar(sense, n=15)
-
+        print("most similar senses", most_similar)
         compare_list = [word_preprocessed]
         for each_word in most_similar:
             append_word = each_word[0].split("|")[0].replace("_", " ")
@@ -281,12 +281,12 @@ def sense2vec_get_words(word,s2v):
                 output.append(append_word.title())
                 compare_list.append(append_word_processed)
 
-
         out = list(OrderedDict.fromkeys(output))
+        return out
     except Exception as ex:
         print("this execption from sense2vec func", ex)
 
-    return out
+    
 
 def get_options(answer,s2v):
     distractors =[]
