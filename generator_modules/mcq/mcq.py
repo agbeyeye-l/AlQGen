@@ -131,7 +131,7 @@ class MCQGenerator:
                 print("answer:",answer)
                 print("verified answer:",verified_answer)
                 print("--------------------------------------------------------")
-                if answer_length> 0 and answer_length < 5:
+                if answer_length> 1 and answer_length < 5:
                     print("question and answer has been added")
                     answer_question_pair.append((verified_answer, question))
         # form questions
