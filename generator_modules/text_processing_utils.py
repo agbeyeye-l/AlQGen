@@ -250,44 +250,40 @@ def edits(word):
 def sense2vec_get_words(word,s2v):
     output = []
     # if answer is made up of conjunctive word "and"
-    # word_split = word.split("and")
-    # if len(word_split)>1:
-    #     word = word_split[0]
-    # else:
-    #     # if answer is a list of items separated by commas
-    #     word_split = word.split(",")
-    #     if word_split and len(word_split)>1:
-    #         word = word_split[0]
-    
-    try:   
-        print("translating answer", word)
-        word_preprocessed =  word.translate(word.maketrans("","", string.punctuation))
-        word_preprocessed = word_preprocessed.lower()
-        print("getting word edit",word)
-        word_edits = edits(word_preprocessed)
+    word_split = word.split("and")
+    if len(word_split)>1:
+        word = word_split[0]
+    else:
+        # if answer is a list of items separated by commas
+        word_split = word.split(",")
+        if word_split and len(word_split)>1:
+            word = word_split[0]
+       
+    word_preprocessed =  word.translate(word.maketrans("","", string.punctuation))
+    word_preprocessed = word_preprocessed.lower()
 
-        word = word.replace(" ", "_")
-        #word = word.replace("-", "_")
-        print("get best senses", word)
-        sense = s2v.get_best_sense(word)
-        most_similar = s2v.most_similar(sense, n=15)
-        print("most similar senses", most_similar)
-        compare_list = [word_preprocessed]
-        for each_word in most_similar:
-            append_word = each_word[0].split("|")[0].replace("_", " ")
-            append_word = append_word.strip()
-            append_word_processed = append_word.lower()
-            append_word_processed = append_word_processed.translate(append_word_processed.maketrans("","", string.punctuation))
-            if append_word_processed not in compare_list and word_preprocessed not in append_word_processed and append_word_processed not in word_edits:
-                output.append(append_word.title())
-                compare_list.append(append_word_processed)
+    word_edits = edits(word_preprocessed)
 
-        out = list(OrderedDict.fromkeys(output))
-        return out
-    except Exception as ex:
-        print("this execption from sense2vec func", ex)
+    word = word.replace(" ", "_")
+    word = word.replace("-", "_")
 
-    
+    sense = s2v.get_best_sense(word)
+    most_similar = s2v.most_similar(sense, n=15)
+
+    compare_list = [word_preprocessed]
+    for each_word in most_similar:
+        append_word = each_word[0].split("|")[0].replace("_", " ")
+        append_word = append_word.strip()
+        append_word_processed = append_word.lower()
+        append_word_processed = append_word_processed.translate(append_word_processed.maketrans("","", string.punctuation))
+        if append_word_processed not in compare_list and word_preprocessed not in append_word_processed and append_word_processed not in word_edits:
+            output.append(append_word.title())
+            compare_list.append(append_word_processed)
+
+
+    out = list(OrderedDict.fromkeys(output))
+
+    return out
 
 def get_options(answer,s2v):
     distractors =[]
@@ -299,7 +295,7 @@ def get_options(answer,s2v):
             return distractors
     except Exception as ex:
         print (" Sense2vec_distractors failed for word : ",answer,ex)
-        
+        return None
 
 
     return distractors
