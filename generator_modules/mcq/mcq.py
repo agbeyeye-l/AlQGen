@@ -49,8 +49,8 @@ class MCQGenerator:
         for index, val in enumerate(answers):
             # get mcq options/distractors
             options = get_options(val, self.s2v)
-            if len(options)<1:
-                continue
+            # if len(options)<1:
+            #     continue
             output = model_output[index, :]
             decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
             # get question statement
