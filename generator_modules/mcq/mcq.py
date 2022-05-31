@@ -49,12 +49,14 @@ class MCQGenerator:
         for index, val in enumerate(answers):
             # get mcq options/distractors
             options = get_options(val, self.s2v)
+            print("options in build question", options)
             # if len(options)<1:
             #     continue
             output = model_output[index, :]
             decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
             # get question statement
             question_text = decoded_data.replace("question:", "").strip()
+            print("question in build question func", question_text)
             # filter options and return the best distractors
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
             options = options if len(options)<7 else options[:6]
@@ -101,6 +103,7 @@ class MCQGenerator:
     def generate(self, keyword_sent_mapping, textComponent):
         batch_text = []
         answers = keyword_sent_mapping.keys()
+        print("answers at time of question generation", answers)
         for answer in answers:
             context = keyword_sent_mapping[answer]
             text = f"context: {context} answer: {answer} </s>"
@@ -171,6 +174,7 @@ class MCQGenerator:
         else:
             try:
                 print("generating mcq questions")
+                print("key sentence map",keyword_sentence_mapping)
                 questions = self.generate(keyword_sentence_mapping,text)
             except Exception as ex:
                 # when execption occurs, return 
