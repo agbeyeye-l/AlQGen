@@ -113,30 +113,30 @@ class MCQGenerator:
 
         with torch.no_grad():
             model_output = self.model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
-        print("decoding questions")
-        questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
-        print("generated questions are:", questions_generated)
-        answer_question_pair=[]
-        for index, answer in enumerate(answers):
-            context = keyword_sent_mapping[answer]
+        # print("decoding questions")
+        # questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
+        # print("generated questions are:", questions_generated)
+        # answer_question_pair=[]
+        # for index, answer in enumerate(answers):
+        #     context = keyword_sent_mapping[answer]
             
-            question = questions_generated[index].replace("question:", "").strip()
+        #     question = questions_generated[index].replace("question:", "").strip()
          
-            if question and answer:
-                print("verifying answer")
-                verified_answer = str(self.verify_answer(question, textComponent))
-                answer_length = len(verified_answer.split(" "))
-                print("context:",context)
-                print("question:",question)
-                print("answer:",answer)
-                print("verified answer:",verified_answer)
-                print("--------------------------------------------------------")
-                if answer_length> 0 and answer_length < 5:
-                    print("question and answer has been added")
-                    answer_question_pair.append((verified_answer, question))
-        # form questions
-        #results = self.build_question_objects(model_output,answers)
-        results = self.formulate_questions(answer_question_pair)
+        #     if question and answer:
+        #         print("verifying answer")
+        #         verified_answer = str(self.verify_answer(question, textComponent))
+        #         answer_length = len(verified_answer.split(" "))
+        #         print("context:",context)
+        #         print("question:",question)
+        #         print("answer:",answer)
+        #         print("verified answer:",verified_answer)
+        #         print("--------------------------------------------------------")
+        #         if answer_length> 0 and answer_length < 5:
+        #             print("question and answer has been added")
+        #             answer_question_pair.append((verified_answer, question))
+        # # form questions
+        results = self.build_question_objects(model_output,answers)
+        # results = self.formulate_questions(answer_question_pair)
         return results
 
                       
