@@ -42,26 +42,26 @@ class MCQGenerator:
             torch.cuda.manual_seed_all(seed)
     
     
-    # def build_question_objects(self,model_output,answers):
-    #     """form questions"""
+    def build_question_objects(self,model_output,answers):
+        """form questions"""
         
-    #     question_list: List[Question] =[]
-    #     for index, val in enumerate(answers):
-    #         # get mcq options/distractors
-    #         options = get_options(val, self.s2v)
-    #         if len(options)<1:
-    #             continue
-    #         output = model_output[index, :]
-    #         decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
-    #         # get question statement
-    #         question_text = decoded_data.replace("question:", "").strip()
-    #         # filter options and return the best distractors
-    #         options = filter_phrases(options, 10,self.normalized_levenshtein) 
-    #         options = options if len(options)<7 else options[:6]
-    #         question = Question(question=question_text, answer= val, options= options, question_type=QuestionType.MCQ)
-    #         question_list.append(question.dict())
+        question_list: List[Question] =[]
+        for index, val in enumerate(answers):
+            # get mcq options/distractors
+            options = get_options(val, self.s2v)
+            if len(options)<1:
+                continue
+            output = model_output[index, :]
+            decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
+            # get question statement
+            question_text = decoded_data.replace("question:", "").strip()
+            # filter options and return the best distractors
+            options = filter_phrases(options, 10,self.normalized_levenshtein) 
+            options = options if len(options)<7 else options[:6]
+            question = Question(question=question_text, answer= val, options= options, question_type=QuestionType.MCQ)
+            question_list.append(question.dict())
 
-    #     return question_list
+        return question_list
     
     def formulate_questions(self,answer_question_pair):
         question_list=[]
