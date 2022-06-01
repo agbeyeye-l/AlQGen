@@ -142,7 +142,7 @@ class MCQGenerator:
                 else:
                     print("here is a short question due to long answer")
                     question = Question(question=question,answer="",options=[],question_type=QuestionType.SHORTQ)
-                    results.append(question)
+                    results.append(question.dict())
                     
         # form questions
         #results = self.build_question_objects(model_output,answers)
