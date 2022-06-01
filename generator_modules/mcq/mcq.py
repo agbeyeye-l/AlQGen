@@ -73,7 +73,8 @@ class MCQGenerator:
             print("getting distractors")
             options = get_options(answer_question[0], self.s2v)
             if not options or len(options)<1:
-                question = Question(question=answer_question[1], answer= answer_question[0], options= [], question_type=QuestionType.SHORTQ)
+                print("here is a short question due to no options")
+                question = Question(question=answer_question[1], answer= "", options= [], question_type=QuestionType.SHORTQ)
                 question_list.append(question.dict())
                 continue
             print("filtering options")
@@ -102,6 +103,7 @@ class MCQGenerator:
         
     def generate(self, keyword_sent_mapping, textComponent):
         batch_text = []
+        results= []
         answers = keyword_sent_mapping.keys()
         print("answers at time of question generation", answers)
         for answer in answers:
@@ -137,9 +139,14 @@ class MCQGenerator:
                 if answer_length> 0 and answer_length < 5:
                     print("question and answer has been added")
                     answer_question_pair.append((verified_answer, question))
+                else:
+                    print("here is a short question due to long answer")
+                    question = Question(question=question,answer="",options=[],question_type=QuestionType.SHORTQ)
+                    results.append(question)
+                    
         # form questions
         #results = self.build_question_objects(model_output,answers)
-        results = self.formulate_questions(answer_question_pair)
+        results.extend(self.formulate_questions(answer_question_pair))
         return results
 
                       
