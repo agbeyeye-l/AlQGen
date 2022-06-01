@@ -17,7 +17,7 @@ from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
 from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
 from generator_modules.utils import QuestionType, ErrorMessages
-from generator_modules.models import QuestionRequest, Question
+from generator_modules.models import QuestionRequest, Question, DistractorRequest
 from typing import List
 
 
@@ -73,7 +73,7 @@ class MCQGenerator:
             print("getting distractors")
             options = get_options(answer_question[0], self.s2v)
             if not options or len(options)<1:
-                question = Question(question=answer_question[1], answer= answer_question[0], options= [answer_question[0]], question_type=QuestionType.MCQ)
+                question = Question(question=answer_question[1], answer= answer_question[0], options= [], question_type=QuestionType.SHORTQ)
                 question_list.append(question.dict())
                 continue
             print("filtering options")
@@ -116,30 +116,30 @@ class MCQGenerator:
 
         with torch.no_grad():
             model_output = self.model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
-        # print("decoding questions")
-        # questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
-        # print("generated questions are:", questions_generated)
-        # answer_question_pair=[]
-        # for index, answer in enumerate(answers):
-        #     context = keyword_sent_mapping[answer]
+        print("decoding questions")
+        questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
+        print("generated questions are:", questions_generated)
+        answer_question_pair=[]
+        for index, answer in enumerate(answers):
+            context = keyword_sent_mapping[answer]
             
-        #     question = questions_generated[index].replace("question:", "").strip()
+            question = questions_generated[index].replace("question:", "").strip()
          
-        #     if question and answer:
-        #         print("verifying answer")
-        #         verified_answer = str(self.verify_answer(question, textComponent))
-        #         answer_length = len(verified_answer.split(" "))
-        #         print("context:",context)
-        #         print("question:",question)
-        #         print("answer:",answer)
-        #         print("verified answer:",verified_answer)
-        #         print("--------------------------------------------------------")
-        #         if answer_length> 0 and answer_length < 5:
-        #             print("question and answer has been added")
-        #             answer_question_pair.append((verified_answer, question))
-        # # form questions
-        results = self.build_question_objects(model_output,answers)
-        # results = self.formulate_questions(answer_question_pair)
+            if question and answer:
+                print("verifying answer")
+                verified_answer = str(self.verify_answer(question, textComponent))
+                answer_length = len(verified_answer.split(" "))
+                print("context:",context)
+                print("question:",question)
+                print("answer:",answer)
+                print("verified answer:",verified_answer)
+                print("--------------------------------------------------------")
+                if answer_length> 0 and answer_length < 5:
+                    print("question and answer has been added")
+                    answer_question_pair.append((verified_answer, question))
+        # form questions
+        #results = self.build_question_objects(model_output,answers)
+        results = self.formulate_questions(answer_question_pair)
         return results
 
                       
@@ -186,4 +186,18 @@ class MCQGenerator:
                 torch.cuda.empty_cache()
                 
             return questions
+        
+    def get_distractors(self, corpus:DistractorRequest ):
+        text = corpus.get('text')
+        questions = corpus.get('questions')
+        result = []
+        
+        if questions:
+            for question in questions:
+                answer = self.verify_answer(question, text)
+                options = get_options(answer, self.s2v)
+                question = Question(question=question, answer=answer, options=options, question_type=QuestionType.MCQ)
+                result.append(question)
+        return result
+                
         

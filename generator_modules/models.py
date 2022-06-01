@@ -5,7 +5,13 @@ class QuestionRequest(BaseModel):
     text:str
     num_question: int =5
     optional_keywords: List[str] =[]
-    
+ 
+ 
+class DistractorRequest(BaseModel):
+    text:str
+    questions: List[str]=[]
+ 
+ 
     
 class Question(BaseModel):
     question:str

@@ -2,6 +2,7 @@ class QuestionType:
     MCQ="MCQ"
     OPENQ="Open Question"
     BOOLQ="True/False"
+    SHORTQ="Short Question"
     
     
 class ErrorMessages:
