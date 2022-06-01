@@ -5,7 +5,7 @@ import torch
 from transformers import T5ForConditionalGeneration,T5Tokenizer
 import random
 import numpy 
-from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options
+from generator_modules.text_processing_utils import tokenize_sentences
 from generator_modules.utils import QuestionType, ErrorMessages
 from generator_modules.models import QuestionRequest, Question
 from typing import List

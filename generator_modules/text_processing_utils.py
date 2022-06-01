@@ -32,6 +32,34 @@ from nltk.corpus import wordnet as wn
 
 MIN_SENTENCE_LENGTH = 20
 
+def summarizer(model,tokenizer,text,max_len,device):
+    text = text.strip()
+    text = text.replace("\n", "")
+    text = f"summarize: {text}"
+    max_len = max_len
+    encoding = tokenizer.encode_plus(text,max_length=max_len, pad_to_max_length=False,truncation=True, return_tensors="pt").to(device)
+
+    input_ids, attention_mask = encoding["input_ids"], encoding["attention_mask"]
+
+    outputs = model.generate(input_ids=input_ids,
+                                    attention_mask=attention_mask,
+                                    early_stopping=True,
+                                    num_beams=3,
+                                    num_return_sequences=1,
+                                    no_repeat_ngram_size=2,
+                                    min_length = 75,
+                                    max_length=300)
+
+
+    decoded_data = [tokenizer.decode(ids,skip_special_tokens=True) for ids in outputs]
+    summary = decoded_data[0]
+    summary_text=''
+    for sentence in sent_tokenize(summary):
+        sent = sentence.capitalize()
+        summary_text +=" "+sent
+    return summary_text.strip()
+
+
 def get_antonym(word):
     """get the opposite in meaning (antonym) of a word"""
     
@@ -347,7 +375,7 @@ def get_phrases(doc):
 
 
 
-def get_keywords(nlp,text,max_keywords,s2v,fdist,normalized_levenshtein,no_of_sentences):
+def get_keywords(nlp,text,summarized_text,max_keywords,s2v,fdist,normalized_levenshtein,no_of_sentences):
     doc = nlp(text)
     max_keywords = int(max_keywords)
 
@@ -361,12 +389,17 @@ def get_keywords(nlp,text,max_keywords,s2v,fdist,normalized_levenshtein,no_of_se
     total_phrases = keywords + filtered_phrases
 
     total_phrases_filtered = filter_phrases(total_phrases, min(max_keywords, 2*no_of_sentences),normalized_levenshtein )
-
-
-    answers = []
-    for answer in total_phrases_filtered:
-        if answer not in answers and MCQs_available(answer,s2v):
-            answers.append(answer)
-
-    answers = answers[:max_keywords]
-    return answers
+    keyword_processor = KeywordProcessor()
+    for key in total_phrases_filtered:
+        keyword_processor.add_keyword(key)
+        
+    relevant_keys = keyword_processor.extract_keywords(summarized_text)
+    relevant_keys = list(set(relevant_keys))
+    # answers = []
+    # for answer in total_phrases_filtered:
+    #     if answer not in answers and MCQs_available(answer,s2v):
+    #         answers.append(answer)
+   
+    #answers = answers[:max_keywords]
+    print("relevant keys", relevant_keys)
+    return relevant_keys[:max_keywords] if len(relevant_keys) > max_keywords else relevant_keys

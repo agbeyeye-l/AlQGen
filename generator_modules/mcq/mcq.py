@@ -15,7 +15,9 @@ from sense2vec import Sense2Vec
 from nltk import FreqDist
 from nltk.corpus import brown
 from similarity.normalized_levenshtein import NormalizedLevenshtein
-from generator_modules.text_processing_utils import tokenize_sentences, get_keywords, get_sentences_for_keyword,get_options,filter_phrases
+from generator_modules.text_processing_utils import (tokenize_sentences, get_keywords, 
+                                                     get_sentences_for_keyword,get_options,filter_phrases,
+                                                     summarizer)
 from generator_modules.utils import QuestionType, ErrorMessages
 from generator_modules.models import QuestionRequest, Question, DistractorRequest
 from typing import List
@@ -159,16 +161,17 @@ class MCQGenerator:
         if len(text)<1:
             return ErrorMessages.noInputTextError()
         
+        summarized_text = summarizer(self.model, self.tokenizer,text,50000,self.device)
         questions: List[Question]=[]
         # tokenize text
         sentences = tokenize_sentences(text)
-        text = " ".join(sentences)
-        
+        text = " ".join(sentences)       
         # extract keywords
-        keywords = get_keywords(self.nlp,text,num_of_questions,self.s2v,self.fdist,self.normalized_levenshtein,len(sentences) )
+        keywords = get_keywords(self.nlp,text,summarized_text,num_of_questions,self.s2v,self.fdist,self.normalized_levenshtein,len(sentences) )
         keywords.extend(optional_keywords)
         keywords = [keyword.lower() for keyword in keywords]
         keywords = list(set(keywords))
+        keywords.extend(optional_keywords)
         # map keywords to sentences
         keyword_sentence_mapping = get_sentences_for_keyword(keywords, sentences)
         for k in keyword_sentence_mapping.keys():
