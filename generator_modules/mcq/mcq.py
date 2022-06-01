@@ -204,7 +204,7 @@ class MCQGenerator:
                 answer = self.verify_answer(question, text)
                 options = get_options(answer, self.s2v)
                 question = Question(question=question, answer=answer, options=options, question_type=QuestionType.MCQ)
-                result.append(question)
+                result.append(question.dict())
         return result
                 
         
