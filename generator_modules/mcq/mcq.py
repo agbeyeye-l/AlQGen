@@ -43,6 +43,8 @@ class MCQGenerator:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
     
+    def summarizer(self,text, max_length):
+        return summarizer(self.model, self.tokenizer,text,int(max_length))
     
     def build_question_objects(self,model_output,answers):
         """form questions"""
@@ -51,17 +53,15 @@ class MCQGenerator:
         for index, val in enumerate(answers):
             # get mcq options/distractors
             options = get_options(val, self.s2v)
-            print("options in build question", options)
             # if len(options)<1:
             #     continue
             output = model_output[index, :]
             decoded_data = self.tokenizer.decode(output, skip_special_tokens=True, clean_up_tokenization_spaces=True)           
             # get question statement
             question_text = decoded_data.replace("question:", "").strip()
-            print("question in build question func", question_text)
             # filter options and return the best distractors
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
-            options = options if len(options)<7 else options[:6]
+            options = options if len(options)<5 else options[:4]
             question = Question(question=question_text, answer= val, options= options, question_type=QuestionType.MCQ)
             question_list.append(question.dict())
 
@@ -75,14 +75,11 @@ class MCQGenerator:
             print("getting distractors")
             options = get_options(answer_question[0], self.s2v)
             if not options or len(options)<1:
-                print("here is a short question due to no options")
                 question = Question(question=answer_question[1], answer= "", options= [], question_type=QuestionType.SHORTQ)
                 question_list.append(question.dict())
                 continue
-            print("filtering options")
             options = filter_phrases(options, 10,self.normalized_levenshtein) 
             options = options if len(options)<7 else options[:6]
-            print("building a question object")
             question = Question(question=answer_question[1], answer= answer_question[0], options= options, question_type=QuestionType.MCQ)
             question_list.append(question.dict())
         return question_list
@@ -107,7 +104,6 @@ class MCQGenerator:
         batch_text = []
         results= []
         answers = keyword_sent_mapping.keys()
-        print("answers at time of question generation", answers)
         for answer in answers:
             context = keyword_sent_mapping[answer]
             text = f"context: {context} answer: {answer} </s>"
@@ -116,7 +112,6 @@ class MCQGenerator:
         encoded_data = self.tokenizer.batch_encode_plus(batch_text, pad_to_max_length=True, return_tensors='pt')
 
         input_ids, attention_masks = encoded_data["input_ids"].to(self.device), encoded_data["attention_mask"].to(self.device)
-        print("generating questions")
 
         with torch.no_grad():
             model_output = self.model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
@@ -124,31 +119,31 @@ class MCQGenerator:
         questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
         print("generated questions are:", questions_generated)
         answer_question_pair=[]
-        for index, answer in enumerate(answers):
-            context = keyword_sent_mapping[answer]
+        # for index, answer in enumerate(answers):
+        #     context = keyword_sent_mapping[answer]
             
-            question = questions_generated[index].replace("question:", "").strip()
+        #     question = questions_generated[index].replace("question:", "").strip()
          
-            if question and answer:
-                print("verifying answer")
-                verified_answer = str(self.verify_answer(question, textComponent))
-                answer_length = len(verified_answer.split(" "))
-                print("context:",context)
-                print("question:",question)
-                print("answer:",answer)
-                print("verified answer:",verified_answer)
-                print("--------------------------------------------------------")
-                if answer_length> 0 and answer_length < 5:
-                    print("question and answer has been added")
-                    answer_question_pair.append((verified_answer, question))
-                else:
-                    print("here is a short question due to long answer")
-                    question = Question(question=question,answer="",options=[],question_type=QuestionType.SHORTQ)
-                    results.append(question.dict())
+        #     if question and answer:
+        #         print("verifying answer")
+        #         verified_answer = str(self.verify_answer(question, textComponent))
+        #         answer_length = len(verified_answer.split(" "))
+        #         print("context:",context)
+        #         print("question:",question)
+        #         print("answer:",answer)
+        #         print("verified answer:",verified_answer)
+        #         print("--------------------------------------------------------")
+        #         if answer_length> 0 and answer_length < 5:
+        #             print("question and answer has been added")
+        #             answer_question_pair.append((verified_answer, question))
+        #         else:
+        #             print("here is a short question due to long answer")
+        #             question = Question(question=question,answer="",options=[],question_type=QuestionType.SHORTQ)
+        #             results.append(question.dict())
                     
         # form questions
-        #results = self.build_question_objects(model_output,answers)
-        results.extend(self.formulate_questions(answer_question_pair))
+        results = self.build_question_objects(model_output,answers)
+        #results.extend(self.formulate_questions(answer_question_pair))
         return results
 
                       

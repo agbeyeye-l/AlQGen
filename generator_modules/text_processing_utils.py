@@ -389,7 +389,7 @@ def get_keywords(nlp,text,summarized_text,max_keywords,s2v,fdist,normalized_leve
     total_phrases = keywords + filtered_phrases
 
     total_phrases_filtered = filter_phrases(total_phrases, min(max_keywords, 2*no_of_sentences),normalized_levenshtein )
-    print("total filtered key phrases before eliminating those that do not have MCQ distractors",total_phrases_filtered)
+    
     # keyword_processor = KeywordProcessor()
     # for key in total_phrases_filtered:
     #     keyword_processor.add_keyword(key)
@@ -402,7 +402,7 @@ def get_keywords(nlp,text,summarized_text,max_keywords,s2v,fdist,normalized_leve
             answers.append(answer)
    
     answers = answers[:max_keywords]
-    print("keys after elemination", answers)
+
     #print("relevant keys", relevant_keys)
     #return relevant_keys[:max_keywords] if len(relevant_keys) > max_keywords else relevant_keys
     return answers
