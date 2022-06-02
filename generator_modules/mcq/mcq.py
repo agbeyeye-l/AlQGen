@@ -44,7 +44,7 @@ class MCQGenerator:
             torch.cuda.manual_seed_all(seed)
     
     def summarizer(self,text, max_length):
-        return summarizer(self.model, self.tokenizer,text,int(max_length))
+        return summarizer(self.model, self.tokenizer,text,int(max_length), self.device)
     
     def build_question_objects(self,model_output,answers):
         """form questions"""
