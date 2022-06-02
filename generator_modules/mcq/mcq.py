@@ -30,6 +30,7 @@ class MCQGenerator:
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
         self.model = T5ForConditionalGeneration.from_pretrained('Parth/result').to(self.device)
         self.answer_verifier_model = T5ForConditionalGeneration.from_pretrained('Parth/boolean').to(self.device)
+        self.summarizer_model = T5ForConditionalGeneration.from_pretrained('t5-base').to(self.device)
         self.nlp = spacy.load('en_core_web_sm')
         self.s2v = Sense2Vec().from_disk('s2v_old')
         self.fdist = FreqDist(brown.words())
@@ -44,7 +45,7 @@ class MCQGenerator:
             torch.cuda.manual_seed_all(seed)
     
     def summarizer(self,text, max_length):
-        return summarizer(self.model, self.tokenizer,text,int(max_length), self.device)
+        return summarizer(self.summarizer_model, self.tokenizer,text,int(max_length), self.device)
     
     def build_question_objects(self,model_output,answers):
         """form questions"""
