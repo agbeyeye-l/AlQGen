@@ -9,7 +9,7 @@ setup(name='AlQGen',
       install_requires=[
            
            'torch==1.10.0',
-           'transformers==4.8.1',
+           'transformers==4.19.2',
            'sense2vec==2.0.0',
            'strsim==0.0.3',
            'six==1.15.0',
