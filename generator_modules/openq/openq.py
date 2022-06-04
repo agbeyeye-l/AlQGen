@@ -58,7 +58,13 @@ class OpenQGenerator:
         sentences = tokenize_sentences(text)
         text = " ".join(sentences)
         answer = self.random_choice()
-        model_input = f"truefalse: {text} passage: {answer} </s>"
+        # answers = []
+        
+        # num_open_question = num_questions//3
+        # for i in range(num_open_question):
+        #     answers.append(self.random_choice())
+            
+        model_input = f"truefalse: {answer} passage: {text} </s>"
 
         encoding = self.tokenizer.encode_plus(model_input, return_tensors="pt")
         input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
