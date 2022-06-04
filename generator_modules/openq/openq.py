@@ -42,7 +42,7 @@ class OpenQGenerator:
                                     no_repeat_ngram_size=2,
                                     early_stopping=True
                                     )
-        outputs = [tokenizer.batch_decode(out[0], skip_special_tokens=True, clean_up_tokenization_spaces=True) for out in
+        outputs = [tokenizer.decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True) for out in
                     beam_output]
         return [output.strip().capitalize() for output in outputs]
 
@@ -61,23 +61,24 @@ class OpenQGenerator:
         num_sentences_per_partition = len(sentences)//num_open_question
         start, end = 0, num_sentences_per_partition
         for _ in range(num_open_question):
-            partition_texts.append(" ".join(sentences[start:end]))
-            start,end = end, end+num_sentences_per_partition
+            if len(sentences[start:end])>1:
+                partition_texts.append(" ".join(sentences[start:end]))
+                start,end = end, end+num_sentences_per_partition
         
         
         answers = [self.random_choice() for _ in range(num_open_question) ]
-        model_inputs=[]
-        for index,answer in enumerate(answers):              
-            model_inputs.append(f"truefalse: {answer} passage: {partition_texts[index]} </s>")
+        for index,answer in enumerate(answers):   
+            if index<len(partition_texts) :          
+                model_input= f"truefalse: {answer} passage: {partition_texts[index]} </s>"
 
-        encoding = self.tokenizer.batch_encode_plus(model_inputs,pad_to_max_length=True, return_tensors="pt")
-        input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
+                encoding = self.tokenizer.encode_plus(model_input, return_tensors="pt")
+                input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
-        outputs = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
-        
-        for out in outputs:
-            question = Question(question=f"{out} {self.open_q_extension()}", options=[], answer='', question_type=QuestionType.OPENQ)
-            question_list.append(question.dict())
+                outputs = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
+            
+            
+                question = Question(question=f"{outputs[0]} {self.open_q_extension()}", options=[], answer='', question_type=QuestionType.OPENQ)
+                question_list.append(question.dict())
             
         if torch.device=='cuda':
             torch.cuda.empty_cache()
