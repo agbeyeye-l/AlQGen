@@ -42,7 +42,7 @@ class OpenQGenerator:
                                     no_repeat_ngram_size=2,
                                     early_stopping=True
                                     )
-        outputs = [tokenizer.decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True) for out in
+        outputs = [tokenizer.batch_decode(out[0], skip_special_tokens=True, clean_up_tokenization_spaces=True) for out in
                     beam_output]
         return [output.strip().capitalize() for output in outputs]
 
@@ -56,17 +56,21 @@ class OpenQGenerator:
         
         question_list: List[Question]=[]
         sentences = tokenize_sentences(text)
-        text = " ".join(sentences)
-        answer = self.random_choice()
-        # answers = []
+        num_open_question = num_questions//3
+        partition_texts=[]
+        num_sentences_per_partition = len(sentences)//num_open_question
+        start, end = 0, num_sentences_per_partition
+        for _ in range(num_open_question):
+            partition_texts.append(" ".join(sentences[start:end]))
+            start,end = end, end+num_sentences_per_partition
         
-        # num_open_question = num_questions//3
-        # for i in range(num_open_question):
-        #     answers.append(self.random_choice())
-            
-        model_input = f"truefalse: {answer} passage: {text} </s>"
+        
+        answers = [self.random_choice() for _ in range(num_open_question) ]
+        model_inputs=[]
+        for index,answer in enumerate(answers):              
+            model_inputs.append(f"truefalse: {answer} passage: {partition_texts[index]} </s>")
 
-        encoding = self.tokenizer.encode_plus(model_input, return_tensors="pt")
+        encoding = self.tokenizer.batch_encode_plus(model_inputs, return_tensors="pt")
         input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
         outputs = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)

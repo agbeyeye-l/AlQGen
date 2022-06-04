@@ -116,10 +116,10 @@ class MCQGenerator:
 
         with torch.no_grad():
             model_output = self.model.generate(input_ids=input_ids, attention_mask=attention_masks, max_length=150)
-        print("decoding questions")
-        questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
-        print("generated questions are:", questions_generated)
-        answer_question_pair=[]
+      
+        #questions_generated = self.tokenizer.batch_decode(model_output,skip_special_tokens=True,clean_up_tokenization_spaces=True)
+        
+        #answer_question_pair=[]
         # for index, answer in enumerate(answers):
         #     context = keyword_sent_mapping[answer]
             
