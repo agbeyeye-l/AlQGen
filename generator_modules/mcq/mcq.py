@@ -28,7 +28,7 @@ class MCQGenerator:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
-        self.model = T5ForConditionalGeneration.from_pretrained('Parth/result').to(self.device)
+        self.model = T5ForConditionalGeneration.from_pretrained('newlife/AlQgen').to(self.device)
         self.answer_verifier_model = T5ForConditionalGeneration.from_pretrained('Parth/boolean').to(self.device)
         self.summarizer_model = T5ForConditionalGeneration.from_pretrained('t5-base').to(self.device)
         self.nlp = spacy.load('en_core_web_sm')
