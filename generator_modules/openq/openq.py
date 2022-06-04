@@ -70,7 +70,7 @@ class OpenQGenerator:
         for index,answer in enumerate(answers):              
             model_inputs.append(f"truefalse: {answer} passage: {partition_texts[index]} </s>")
 
-        encoding = self.tokenizer.batch_encode_plus(model_inputs, return_tensors="pt")
+        encoding = self.tokenizer.batch_encode_plus(model_inputs,pad_to_max_length=True, return_tensors="pt")
         input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
         outputs = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
