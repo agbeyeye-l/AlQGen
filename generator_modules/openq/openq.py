@@ -16,7 +16,7 @@ class OpenQGenerator:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
-        self.model = T5ForConditionalGeneration.from_pretrained('ramsrigouthamg/t5_boolean_questions').to(self.device)
+        self.model = T5ForConditionalGeneration.from_pretrained('newlife/openq-generator').to(self.device)
         self.set_seed(42)
         
     def set_seed(self,seed):
@@ -33,7 +33,7 @@ class OpenQGenerator:
         extension = ["Explain your answer.", "Why?", "Argue.", "Elaborate on your answer.", "Give a brief explanation."]
         return extension[random.randint(0,len(extension)-1)]
 
-    def beam_search_decoding (self,inp_ids,attn_mask,model,tokenizer):
+    def decoder (self,inp_ids,attn_mask,model,tokenizer):
         beam_output = model.generate(input_ids=inp_ids,
                                         attention_mask=attn_mask,
                                         max_length=256,
@@ -74,7 +74,7 @@ class OpenQGenerator:
                 encoding = self.tokenizer.encode_plus(model_input, return_tensors="pt")
                 input_ids, attention_masks = encoding["input_ids"].to(self.device), encoding["attention_mask"].to(self.device)
 
-                outputs = self.beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
+                outputs = self.decoder (input_ids, attention_masks,self.model,self.tokenizer)
             
             
                 question = Question(question=f"{outputs[0]} {self.open_q_extension()}", options=[], answer='', question_type=QuestionType.OPENQ)

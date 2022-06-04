@@ -11,8 +11,7 @@ class DistractorRequest(BaseModel):
     text:str
     questions: List[str]=[]
  
- 
-    
+       
 class Question(BaseModel):
     question:str
     answer: str

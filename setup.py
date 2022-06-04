@@ -5,7 +5,7 @@ setup(name='AlQGen',
       description='Automatic Question generation system',
       author='akl',
       author_email='',
-      packages=['generator_modules', 'generator_modules.mcq', 'generator_modules.openq', 'generator_modules.boolq'],
+      packages=['generator_modules', 'generator_modules.mcq', 'generator_modules.openq', 'generator_modules.boolq','generator_modules.distractors'],
       install_requires=[
            
            'torch==1.10.0',
@@ -25,7 +25,7 @@ setup(name='AlQGen',
            'flashtext==2.7',
            'pandas==1.3.5',
            'pydantic',
-           'sentencepiece'
+           'sentencepiece==0.1.96'
       ],
-      package_data={'generator_modules': ['generator_modules.py', 'mcq.py', 'openq.py','boolq.py']}
+      package_data={'generator_modules': ['generator_modules.py', 'mcq.py', 'openq.py','boolq.py','distractors.py']}
       )
