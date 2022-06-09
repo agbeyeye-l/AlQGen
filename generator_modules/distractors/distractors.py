@@ -38,6 +38,7 @@ class DistractorGenerator:
             )
             if "?" not in answer and len(answer)<100:
                 options = get_options(answer, self.s2v)
+                options = options if options else []
                 question_object = Question(question=question, answer=answer, options=options, question_object=QuestionType.MCQ)
             else:
                 question_object = Question(question=question, answer="Not found", options=[], question_object=QuestionType.MCQ)
