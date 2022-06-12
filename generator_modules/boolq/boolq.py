@@ -14,7 +14,6 @@ from generator_modules.models import QuestionRequest, Question
 from typing import List
 
 
-
 class BoolQGenerator:
     def __init__(self):
         self.nlp = spacy.load('en_core_web_sm')
@@ -49,7 +48,7 @@ class BoolQGenerator:
             key, statement = keyword_sentence_tuple.pop()
             if not state:
                 statement = generate_false_statement(statement,key)
-            if statement:
+            if statement and "?" not in statement:
                 question = Question(question=statement, options=["True","False"],answer=str(state), question_type=QuestionType.BOOLQ)
                 bool_questions.append(question.dict())
 

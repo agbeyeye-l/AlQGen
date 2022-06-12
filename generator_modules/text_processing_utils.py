@@ -2,20 +2,20 @@
 import numpy as np 
 import pandas as pd
 import time
-import torch
-from transformers import T5ForConditionalGeneration,T5Tokenizer
+# import torch
+# from transformers import T5ForConditionalGeneration,T5Tokenizer
 import random
-import spacy
+# import spacy
 import zipfile
 import os
 import json
-from sense2vec import Sense2Vec
+# from sense2vec import Sense2Vec
 import requests
 from collections import OrderedDict
 import string
 import pke
 import nltk
-from nltk import FreqDist
+# from nltk import FreqDist
 nltk.download('brown')
 nltk.download('stopwords')
 nltk.download('popular')
@@ -308,10 +308,7 @@ def sense2vec_get_words(word,s2v):
             output.append(append_word.title())
             compare_list.append(append_word_processed)
 
-
-    out = list(OrderedDict.fromkeys(output))
-
-    return out
+    return list(OrderedDict.fromkeys(output))
 
 def get_options(answer,s2v):
     distractors =[]
@@ -357,21 +354,23 @@ def get_sentences_for_keyword(keywords, sentences):
     return keyword_sentences
 
 
-def get_phrases(doc):
-    phrases={}
+def get_most_occuring_noun_chunks(model,raw_text,n=50):
+    # storage of noun chunks 
+    noun_chunks ={}
+    # spaCy to convert text into chunks
+    doc =model(raw_text)
+    # count the frequency of each noun chunk
     for np in doc.noun_chunks:
         phrase =np.text
         len_phrase = len(phrase.split())
         if len_phrase > 1:
-            if phrase not in phrases:
-                phrases[phrase]=1
-            else:
-                phrases[phrase]=phrases[phrase]+1
+            noun_chunks[phrase]=noun_chunks.get(phrase,0)+1
 
-    phrase_keys=list(phrases.keys())
+    phrase_keys=list(noun_chunks.keys())
+    # sort noun chunks by frequency
     phrase_keys = sorted(phrase_keys, key= lambda x: len(x),reverse=True)
-    phrase_keys=phrase_keys[:50]
-    return phrase_keys
+    # return top n most frequently occurring noun chunk
+    return phrase_keys[:n]
 
 
 
@@ -383,7 +382,7 @@ def get_keywords(nlp,text,summarized_text,max_keywords,s2v,fdist,normalized_leve
     keywords = sorted(keywords, key=lambda x: fdist[x])
     keywords = filter_phrases(keywords, max_keywords,normalized_levenshtein )
 
-    phrase_keys = get_phrases(doc)
+    phrase_keys = get_most_occuring_noun_chunks(model=nlp,raw_text=text)
     filtered_phrases = filter_phrases(phrase_keys, max_keywords,normalized_levenshtein )
 
     total_phrases = keywords + filtered_phrases
