@@ -90,7 +90,7 @@ def sense2vec_get_words(word,s2v):
     word = word.replace(" ", "_")
 
     try:
-      sense = s2v.get_best_sense(word)
+      sense = s2v.get_best_sense(word, senses= ["NOUN", "PERSON","PRODUCT","LOC","ORG","EVENT","NORP","WORK OF ART","FAC","GPE","NUM","FACILITY"])
       most_similar = s2v.most_similar(sense, n=20)
     except:
       return []
